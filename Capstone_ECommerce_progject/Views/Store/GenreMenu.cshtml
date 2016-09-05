@@ -1,0 +1,9 @@
+﻿@model IEnumerable<Capstone_ECommerce_progject.Models.Genre>
+
+<ul id="categories">
+    @foreach(var genre in Model)
+    {
+        <li>@Html.ActionLink(genre.Name,"Browse","store", new { Genre = genre.Name, }, null)
+    </li>
+    }
+</ul>

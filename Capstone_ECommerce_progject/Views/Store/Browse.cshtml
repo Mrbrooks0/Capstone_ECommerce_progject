@@ -1,0 +1,21 @@
+﻿@model Capstone_ECommerce_progject.Models.Genre
+
+@{
+    ViewBag.Title = "Browse Albums";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="genre">
+    <h3><em>Genre: @Model.Name</em></h3>
+    <ul class="album-list">
+        @foreach (var album in Model.Albums)
+        {
+            <li><a href="@Url.Action("Details",new {id=album.AlbumID})">
+                <img alt="@album.Title" src="@album.AlbumArtUrl"/>
+                <span>@album.Title</span>
+                </a>
+            </li>
+        }
+    </ul>
+
+</div>

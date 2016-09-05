@@ -1,0 +1,114 @@
+﻿@model Capstone_ECommerce_progject.View_Models.ShoppingCartViewModel
+
+@{
+    ViewBag.Title = "Shopping Cart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Scripts{
+
+   <script type="text/javascript">
+
+    $(function () {
+        // Document.ready -> link up remove event handler
+        $(".RemoveLink").click(function () {
+            //get the Id from the link
+            var recordToDelete = $(this).attr("data-id");
+            var PostToUrl = $(this).attr("data-url");
+
+            if (recordToDelete != '') {
+                // Perform the ajax post
+                $.ajax(PostToUrl, {
+                    type: "post", data: { "id": recordToDelete }
+                    , dataType: "json",
+                }).done
+                (function (data) {
+                    AdjustTotal(data);
+                });
+            }
+        });
+    });
+    function handleUpdate() {
+        // Load and deserialize the returned JSON data
+        var json = context.get_data();
+        var data = Sys.Serialization.JavaScriptSerializer.deserialize(json);
+        // Update the page elements
+        AdjustTotal(data);
+    }
+
+    function AdjustTotal(data) {
+        if (data.ItemCount == 0) {
+            $('#row-' + data.DeleteId).fadeOut('slow');
+        } else {
+            $('#item-count-' + data.DeleteId).text(data.ItemCount);
+        }
+        $('#cart-total').text(data.CartTotal);
+        $('#update-message').text(data.Message);
+        $('#cart-status').text('Cart (' + data.CartCount + ')');
+    }
+</script>
+}
+<h3>
+    <em>Review</em> your cart
+</h3>
+<p class="button">
+    @Html.ActionLink("Checkout >>", "AddressAndPayment", "Checkout")
+</p>
+<div id="update-message"></div>
+<div>
+    @foreach(var item in Model.CartItems)
+    {
+        <p>
+            @Html.ValidationMessageFor(model => model.CartItems.Count)
+        </p>
+    }
+</div>
+<table>
+    <tr>
+        <th>
+            Album Name
+        </th>
+        <th>
+            Price (Each)
+        </th>
+        <th>
+            Quantity
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.CartItems)
+    {
+        <tr id="row-@item.RecordID">
+            <td>
+                @Html.ActionLink(item.Album.Title, "Details", "Store", new { id = item.AlbumID }, null)
+            </td>
+    <td>
+        @item.Album.Price
+    </td>
+            <td id="item-count-@item.RecordID">
+                @item.count
+            </td>
+            <td>
+               <a href="#" class="RemoveLink" data-id="@item.RecordID" data-url="@Url.Content("~/ShoppingCart/RemoveFromCart")" onclick="history.go(0)">Remove from cart</a>
+            </td>
+        </tr> 
+    }
+    <tr>
+        <td>
+            Total
+        </td>
+        <td></td>
+        <td></td>
+        <td id="Cart-total">
+            @Model.CartTotal
+        </td>
+    </tr>
+</table>
+<form action="https://www.paypal.com/us/cgi-bin/webscr" method="post">
+    <input type="hidden" name="cmd" value="_xclick">
+    <input type="hidden" name="business" value="james_Brooks0@hotmail.com">
+    <input type="hidden" name="item_name" value="Cart Total">
+    <input type="hidden" name="currency_code" value="USD">
+    <input type="hidden" name="amount" value="@Model.CartTotal">
+    <input type="image" src="http://www.paypal.com/en_US/i/btn/x-click-but01.gif" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+</form>
